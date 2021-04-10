@@ -1,5 +1,5 @@
 nmake /f Mkfiles/msvc.mak clean
-nmake /f Mkfiles/msvc.mak
+nmake /f Mkfiles/msvc.mak libobj PURE_OBJ_LINKING=1
 
 rmdir /s /q objs-for-delphi
 mkdir objs-for-delphi

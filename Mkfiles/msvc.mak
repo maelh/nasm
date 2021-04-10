@@ -19,11 +19,15 @@ bindir		= $(prefix)/bin
 mandir		= $(prefix)/man
 
 !IF "$(DEBUG)" == "1"
-CFLAGS		= /Od /Zi /GS- /D_NO_CRT_STDIO_INLINE
+CFLAGS		= /Od /Zi
 LDFLAGS		= /DEBUG
 !ELSE
-CFLAGS		= /O2 /Zi /GS- /D_NO_CRT_STDIO_INLINE
+CFLAGS		= /O2 /Zi
 LDFLAGS		= /DEBUG /OPT:REF /OPT:ICF # (latter two undoes /DEBUG harm)
+!ENDIF
+
+!IF "$(PURE_OBJ_LINKING)" == "1"
+CFLAGS		= $(CFLAGS) /GS- /D_NO_CRT_STDIO_INLINE
 !ENDIF
 
 CC		= cl
@@ -121,6 +125,8 @@ DEPDIRS  = . include config x86 rdoff $(SUBDIRS)
 NASMLIB = libnasm.$(A)
 
 all: nasm$(X) ndisasm$(X) rdf
+
+libobj: $(LIBOBJ)
 
 nasm$(X): $(NASM) $(NASMLIB)
 	$(CC) /Fe$@ $(NASM) $(LDFLAGS) $(NASMLIB) $(LIBS)
