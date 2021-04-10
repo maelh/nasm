@@ -1132,6 +1132,10 @@ static const char * const condition_name[16] = {
     "s", "ns", "pe", "po", "l", "nl", "ng", "g"
 };
 
+typedef char formatted_hex_number_t[32];
+
+extern void format_as_hex_number(uint64_t number, formatted_hex_number_t formatted_number, int digits);
+
 int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, int segsize,
                int64_t offset, int autosync, iflag_t *prefer)
 {
@@ -1149,6 +1153,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
     struct prefix_info prefix;
     bool end_prefix;
     bool is_evex;
+    formatted_hex_number_t fhn;
 
     memset(&ins, 0, sizeof ins);
 
@@ -1508,18 +1513,19 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                 slen +=
                     snprintf(output + slen, outbufsize - slen, "short ");
             }
+            format_as_hex_number(offs, fhn, 0);
             slen +=
-                snprintf(output + slen, outbufsize - slen, "0x%"PRIx64"",
-                        offs);
+                snprintf(output + slen, outbufsize - slen, "%s", fhn);
         } else if (!(MEM_OFFS & ~t)) {
+            format_as_hex_number(offs, fhn, 0);
             slen +=
                 snprintf(output + slen, outbufsize - slen,
-                        "[%s%s%s0x%"PRIx64"]",
+                        "[%s%s%s%s]",
                         (segover ? segover : ""),
                         (segover ? ":" : ""),
                         (o->disp_size == 64 ? "qword " :
                          o->disp_size == 32 ? "dword " :
-                         o->disp_size == 16 ? "word " : ""), offs);
+                         o->disp_size == 16 ? "word " : ""), fhn);
             segover = NULL;
         } else if (is_class(REGMEM, t)) {
             int started = false;
@@ -1605,9 +1611,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = "+";
                     }
+                    format_as_hex_number(offset, fhn, 0);
                     slen +=
-                        snprintf(output + slen, outbufsize - slen, "%s0x%"PRIx32"",
-                                prefix, offset);
+                        snprintf(output + slen, outbufsize - slen, "%s%s",
+                                prefix, fhn);
                 } else {
                     const char *prefix;
                     uint8_t offset = offs;
@@ -1617,9 +1624,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = "+";
                     }
+                    format_as_hex_number(offset, fhn, 0);
                     slen +=
-                        snprintf(output + slen, outbufsize - slen, "%s0x%"PRIx8"",
-                                prefix, offset);
+                        snprintf(output + slen, outbufsize - slen, "%s%s",
+                                prefix, fhn);                    
                 }
             } else if (o->segment & SEG_DISP16) {
                 const char *prefix;
@@ -1630,9 +1638,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                 } else {
                     prefix = started ? "+" : "";
                 }
+                format_as_hex_number(offset, fhn, 0);
                 slen +=
                     snprintf(output + slen, outbufsize - slen,
-                            "%s0x%"PRIx16"", prefix, offset);
+                            "%s%s", prefix, fhn);
             } else if (o->segment & SEG_DISP32) {
                 if (prefix.asize == 64) {
                     const char *prefix;
@@ -1643,9 +1652,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = started ? "+" : "";
                     }
+                    format_as_hex_number(offset, fhn, 0);
                     slen +=
                         snprintf(output + slen, outbufsize - slen,
-                                "%s0x%"PRIx64"", prefix, offset);
+                                "%s%s", prefix, fhn);
                 } else {
                     const char *prefix;
                     uint32_t offset = offs;
@@ -1655,9 +1665,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = started ? "+" : "";
                     }
+                    format_as_hex_number(offset, fhn, 0);
                     slen +=
                         snprintf(output + slen, outbufsize - slen,
-                                "%s0x%"PRIx32"", prefix, offset);
+                                "%s%s", prefix, fhn);
                 }
             }
 
@@ -1769,8 +1780,12 @@ int32_t eatbyte(uint8_t *data, char *output, int outbufsize, int segsize)
         }
         /* else fall through */
     default:
-        snprintf(output, outbufsize, "db 0x%02x", byte);
-        break;
+        {
+            formatted_hex_number_t fhn;
+            format_as_hex_number(byte, fhn, 2);
+            snprintf(output, outbufsize, "db %s", fhn);        
+            break;
+        }
     }
 
     if (str)
