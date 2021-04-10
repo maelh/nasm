@@ -228,10 +228,10 @@ WARNFILES = asm\warnings.c include\warnings.h doc\warnings.src
 
 warnings:
 	$(RM_F) $(WARNFILES)
-	$(MAKE) asm\warnings.time
-
-asm\warnings.time: $(ALLOBJ:.@OBJEXT@=.c)
-	: > asm\warnings.time
+#	$(MAKE) asm\warnings.time
+#
+#asm\warnings.time: $(ALLOBJ:.@OBJEXT@=.c)
+#	: > asm\warnings.time
 	$(MAKE) $(WARNFILES)
 
 asm\warnings.c: asm\warnings.pl asm\warnings.time
