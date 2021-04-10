@@ -222,25 +222,24 @@ x86\regs.h: x86\regs.dat x86\regs.pl
 # Extract warnings from source code. This is done automatically if any
 # C files have changed; the script is fast enough that that is
 # reasonable, but doesn't update the time stamp if the files aren't
-# changed, to avoid rebuilding everything every time. Track the actual
-# dependency by the empty file asm\warnings.time.
+# changed, to avoid rebuilding everything every time.
 WARNFILES = asm\warnings.c include\warnings.h doc\warnings.src
 
-warnings:
-	$(RM_F) $(WARNFILES)
-#	$(MAKE) asm\warnings.time
-#
-#asm\warnings.time: $(ALLOBJ:.@OBJEXT@=.c)
-#	: > asm\warnings.time
-	$(MAKE) $(WARNFILES)
+ALLC = $(ALLOBJ:.obj=.c)
+# All c files except for asm\warnings.c -- this avoids cyclic dependencies and
+# is more logical, since asm\warnings.c should not depend on itself as it is
+# created/extracted only from source files *other* than itself.
+WARNFILES_DEPS = $(ALLC:asm\warnings.c=)
 
-asm\warnings.c: asm\warnings.pl asm\warnings.time
+warnings: $(WARNFILES)
+
+asm\warnings.c: asm\warnings.pl $(WARNFILES_DEPS)
 	$(RUNPERL) $(srcdir)\asm\warnings.pl c asm\warnings.c $(srcdir)
 
-include\warnings.h: asm\warnings.pl asm\warnings.time
+include\warnings.h: asm\warnings.pl $(WARNFILES_DEPS)
 	$(RUNPERL) $(srcdir)\asm\warnings.pl h include\warnings.h $(srcdir)
 
-doc\warnings.src: asm\warnings.pl asm\warnings.time
+doc\warnings.src: asm\warnings.pl $(WARNFILES_DEPS)
 	$(RUNPERL) $(srcdir)\asm\warnings.pl doc doc\warnings.src $(srcdir)
 
 # Assembler token hash
