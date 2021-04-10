@@ -19,10 +19,10 @@ bindir		= $(prefix)/bin
 mandir		= $(prefix)/man
 
 !IF "$(DEBUG)" == "1"
-CFLAGS		= /Od /Zi
+CFLAGS		= /Od /Zi /GS- /D_NO_CRT_STDIO_INLINE
 LDFLAGS		= /DEBUG
 !ELSE
-CFLAGS		= /O2 /Zi
+CFLAGS		= /O2 /Zi /GS- /D_NO_CRT_STDIO_INLINE
 LDFLAGS		= /DEBUG /OPT:REF /OPT:ICF # (latter two undoes /DEBUG harm)
 !ENDIF
 
