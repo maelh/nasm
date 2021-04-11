@@ -1132,14 +1132,14 @@ static const char * const condition_name[16] = {
     "s", "ns", "pe", "po", "l", "nl", "ng", "g"
 };
 
-typedef char formatted_hex_number_t[32];
+typedef char hexstr_t[32];
 
 #ifdef PURE_OBJ_LINKING
-extern void format_as_hex_number(uint64_t number, formatted_hex_number_t formatted_number, int digits);
+extern void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr);
 #else
-void format_as_hex_number(uint64_t number, formatted_hex_number_t formatted_number, int digits)
+void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr)
 {
-    snprintf(formatted_number, sizeof(formatted_number), "0x%.*x", digits, number);
+    snprintf(hexstr, sizeof(hexstr), "0x%.*x", digits, number);
 }   
 #endif
 
@@ -1160,7 +1160,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
     struct prefix_info prefix;
     bool end_prefix;
     bool is_evex;
-    formatted_hex_number_t fhn;
+    hexstr_t hexstr;
 
     memset(&ins, 0, sizeof ins);
 
@@ -1520,11 +1520,11 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                 slen +=
                     snprintf(output + slen, outbufsize - slen, "short ");
             }
-            format_as_hex_number(offs, fhn, 0);
+            format_as_hex_number(offs, 0, hexstr);
             slen +=
-                snprintf(output + slen, outbufsize - slen, "%s", fhn);
+                snprintf(output + slen, outbufsize - slen, "%s", hexstr);
         } else if (!(MEM_OFFS & ~t)) {
-            format_as_hex_number(offs, fhn, 0);
+            format_as_hex_number(offs, 0, hexstr);
             slen +=
                 snprintf(output + slen, outbufsize - slen,
                         "[%s%s%s%s]",
@@ -1532,7 +1532,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                         (segover ? ":" : ""),
                         (o->disp_size == 64 ? "qword " :
                          o->disp_size == 32 ? "dword " :
-                         o->disp_size == 16 ? "word " : ""), fhn);
+                         o->disp_size == 16 ? "word " : ""), hexstr);
             segover = NULL;
         } else if (is_class(REGMEM, t)) {
             int started = false;
@@ -1618,10 +1618,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = "+";
                     }
-                    format_as_hex_number(offset, fhn, 0);
+                    format_as_hex_number(offset, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen, "%s%s",
-                                prefix, fhn);
+                                prefix, hexstr);
                 } else {
                     const char *prefix;
                     uint8_t offset = offs;
@@ -1631,10 +1631,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = "+";
                     }
-                    format_as_hex_number(offset, fhn, 0);
+                    format_as_hex_number(offset, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen, "%s%s",
-                                prefix, fhn);                    
+                                prefix, hexstr);                    
                 }
             } else if (o->segment & SEG_DISP16) {
                 const char *prefix;
@@ -1645,10 +1645,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                 } else {
                     prefix = started ? "+" : "";
                 }
-                format_as_hex_number(offset, fhn, 0);
+                format_as_hex_number(offset, 0, hexstr);
                 slen +=
                     snprintf(output + slen, outbufsize - slen,
-                            "%s%s", prefix, fhn);
+                            "%s%s", prefix, hexstr);
             } else if (o->segment & SEG_DISP32) {
                 if (prefix.asize == 64) {
                     const char *prefix;
@@ -1659,10 +1659,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = started ? "+" : "";
                     }
-                    format_as_hex_number(offset, fhn, 0);
+                    format_as_hex_number(offset, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen,
-                                "%s%s", prefix, fhn);
+                                "%s%s", prefix, hexstr);
                 } else {
                     const char *prefix;
                     uint32_t offset = offs;
@@ -1672,10 +1672,10 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = started ? "+" : "";
                     }
-                    format_as_hex_number(offset, fhn, 0);
+                    format_as_hex_number(offset, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen,
-                                "%s%s", prefix, fhn);
+                                "%s%s", prefix, hexstr);
                 }
             }
 
@@ -1788,9 +1788,9 @@ int32_t eatbyte(uint8_t *data, char *output, int outbufsize, int segsize)
         /* else fall through */
     default:
         {
-            formatted_hex_number_t fhn;
-            format_as_hex_number(byte, fhn, 2);
-            snprintf(output, outbufsize, "db %s", fhn);        
+            hexstr_t hexstr;
+            format_as_hex_number(byte, 2, hexstr);
+            snprintf(output, outbufsize, "db %s", hexstr);        
             break;
         }
     }
