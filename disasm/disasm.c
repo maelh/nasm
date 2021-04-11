@@ -1134,7 +1134,14 @@ static const char * const condition_name[16] = {
 
 typedef char formatted_hex_number_t[32];
 
+#ifdef PURE_OBJ_LINKING
 extern void format_as_hex_number(uint64_t number, formatted_hex_number_t formatted_number, int digits);
+#else
+void format_as_hex_number(uint64_t number, formatted_hex_number_t formatted_number, int digits)
+{
+    snprintf(formatted_number, sizeof(formatted_number), "0x%.*x", digits, number);
+}   
+#endif
 
 int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, int segsize,
                int64_t offset, int autosync, iflag_t *prefer)
