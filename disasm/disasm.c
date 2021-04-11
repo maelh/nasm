@@ -1132,12 +1132,16 @@ static const char * const condition_name[16] = {
     "s", "ns", "pe", "po", "l", "nl", "ng", "g"
 };
 
+typedef enum {VB8, VB16, VB32, VB64} value_bitness_t;
 typedef char hexstr_t[32];
 
 #ifdef OBJS_FOR_EXTERNAL_USE
-extern void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr);
+extern
+void format_as_hex_number(uint64_t number, value_bitness_t number_bitness,
+    int digits, hexstr_t hexstr)
 #else
-void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr)
+void format_as_hex_number(uint64_t number, value_bitness_t number_bitness,
+    int digits, hexstr_t hexstr)
 {
     snprintf(hexstr, sizeof(hexstr_t), "0x%.*llx", digits, number);
 }   
@@ -1520,11 +1524,11 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                 slen +=
                     snprintf(output + slen, outbufsize - slen, "short ");
             }
-            format_as_hex_number(offs, 0, hexstr);
+            format_as_hex_number(offs, VB64, 0, hexstr);
             slen +=
                 snprintf(output + slen, outbufsize - slen, "%s", hexstr);
         } else if (!(MEM_OFFS & ~t)) {
-            format_as_hex_number(offs, 0, hexstr);
+            format_as_hex_number(offs, VB64, 0, hexstr);
             slen +=
                 snprintf(output + slen, outbufsize - slen,
                         "[%s%s%s%s]",
@@ -1618,7 +1622,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = "+";
                     }
-                    format_as_hex_number(offset, 0, hexstr);
+                    format_as_hex_number(offset, VB32, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen, "%s%s",
                                 prefix, hexstr);
@@ -1631,7 +1635,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = "+";
                     }
-                    format_as_hex_number(offset, 0, hexstr);
+                    format_as_hex_number(offset, VB8, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen, "%s%s",
                                 prefix, hexstr);                    
@@ -1645,7 +1649,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                 } else {
                     prefix = started ? "+" : "";
                 }
-                format_as_hex_number(offset, 0, hexstr);
+                format_as_hex_number(offset, VB16, 0, hexstr);
                 slen +=
                     snprintf(output + slen, outbufsize - slen,
                             "%s%s", prefix, hexstr);
@@ -1659,7 +1663,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = started ? "+" : "";
                     }
-                    format_as_hex_number(offset, 0, hexstr);
+                    format_as_hex_number(offset, VB64, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen,
                                 "%s%s", prefix, hexstr);
@@ -1672,7 +1676,7 @@ int32_t disasm(uint8_t *data, int32_t data_size, char *output, int outbufsize, i
                     } else {
                         prefix = started ? "+" : "";
                     }
-                    format_as_hex_number(offset, 0, hexstr);
+                    format_as_hex_number(offset, VB32, 0, hexstr);
                     slen +=
                         snprintf(output + slen, outbufsize - slen,
                                 "%s%s", prefix, hexstr);
@@ -1789,7 +1793,7 @@ int32_t eatbyte(uint8_t *data, char *output, int outbufsize, int segsize)
     default:
         {
             hexstr_t hexstr;
-            format_as_hex_number(byte, 2, hexstr);
+            format_as_hex_number(byte, VB8, 2, hexstr);
             snprintf(output, outbufsize, "db %s", hexstr);        
             break;
         }
