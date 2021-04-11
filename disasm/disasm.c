@@ -1139,7 +1139,7 @@ extern void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr);
 #else
 void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr)
 {
-    snprintf(hexstr, sizeof(hexstr), "0x%.*x", digits, number);
+    snprintf(hexstr, sizeof(hexstr_t), "0x%.*llx", digits, number);
 }   
 #endif
 
