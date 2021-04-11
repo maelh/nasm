@@ -1138,7 +1138,7 @@ typedef char hexstr_t[32];
 #ifdef OBJS_FOR_EXTERNAL_USE
 extern
 void format_as_hex_number(uint64_t number, value_bitness_t number_bitness,
-    int digits, hexstr_t hexstr)
+    int digits, hexstr_t hexstr);
 #else
 void format_as_hex_number(uint64_t number, value_bitness_t number_bitness,
     int digits, hexstr_t hexstr)
