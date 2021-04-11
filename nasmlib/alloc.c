@@ -42,10 +42,15 @@
 
 size_t _nasm_last_string_size;
 
+
+#ifdef PURE_OBJ_LINKING
+extern void nasm_alloc_failed(void);
+#else
 fatal_func nasm_alloc_failed(void)
 {
     nasm_critical("out of memory!");
 }
+#endif
 
 void *nasm_malloc(size_t size)
 {
