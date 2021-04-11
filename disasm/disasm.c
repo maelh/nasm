@@ -1134,7 +1134,7 @@ static const char * const condition_name[16] = {
 
 typedef char hexstr_t[32];
 
-#ifdef PURE_OBJ_LINKING
+#ifdef OBJS_FOR_EXTERNAL_USE
 extern void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr);
 #else
 void format_as_hex_number(uint64_t number, int digits, hexstr_t hexstr)

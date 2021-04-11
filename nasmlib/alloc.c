@@ -43,7 +43,7 @@
 size_t _nasm_last_string_size;
 
 
-#ifdef PURE_OBJ_LINKING
+#ifdef OBJS_FOR_EXTERNAL_USE
 extern void nasm_alloc_failed(void);
 #else
 fatal_func nasm_alloc_failed(void)
